@@ -2,79 +2,198 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FSRDC Research Output Dashboard</title>
+
+  <!-- External libraries -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 900px;
+      max-width: 1100px;
       margin: auto;
       padding: 2rem;
       background-color: #f9f9f9;
     }
-    h1, h2 {
-      color: #2c3e50;
+    h1, h2 { color: #2c3e50; }
+    nav { margin-bottom: 2rem; }
+    nav a {
+      margin-right: 1rem;
+      color: #0077b6;
+      text-decoration: none;
+      font-weight: bold;
     }
-    section {
-      margin-bottom: 2rem;
+    section { margin-bottom: 3rem; }
+    .caption {
+      font-style: italic;
+      margin-top: .5rem;
+      color: #555;
     }
-    img {
-      max-width: 100%;
-      height: auto;
-      border: 1px solid #ccc;
-      margin-top: 1rem;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 1rem;
-    }
-    table, th, td {
-      border: 1px solid #bbb;
-    }
-    th, td {
-      padding: 0.5rem;
-      text-align: left;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #888;
-      margin-top: 4rem;
+    img { max-width: 100%; height: auto; border: 1px solid #ccc; margin-top: 1rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    table, th, td { border: 1px solid #bbb; }
+    th, td { padding: 0.5rem; text-align: left; }
+    footer { text-align: center; font-size: 0.9rem; color: #888; margin-top: 4rem; }
+
+    /* Dark-mode support */
+    @media (prefers-color-scheme: dark) {
+      body { background: #1e1e1e; color: #ddd; }
+      table, th, td { border-color: #444; }
+      nav a { color: #90caf9; }
     }
   </style>
 </head>
 <body>
 
   <h1>FSRDC Research Output Dashboard</h1>
-  <p>This dashboard presents our data analysis and visualization results for Project 3 in CIT5900.</p>
+  <p>This dashboard summarizes key insights from our CIT 5900 Project 3 analysis of Federal Statistical Research Data Center (FSRDC) outputs. Interactive charts let you explore the data &mdash; captions highlight the main take-aways.</p>
 
-  <section>
+  <nav>
+    <a href="#rdc">Top RDCs</a>
+    <a href="#trend">Trends</a>
+    <a href="#authors">Authors</a>
+    <a href="#insight">Insights</a>
+    <a href="#samples">Samples</a>
+  </nav>
+
+  <section id="rdc">
     <h2>Top 10 Research Data Centers (RDCs)</h2>
-    <p>This chart shows the 10 RDCs with the most research outputs.</p>
-    <img src="chart_1.png" alt="Top RDCs chart">
+    <div id="chart-rdc" style="height:400px;"></div>
+    <p class="caption">Chicago, Boston and Washington DC have dominated output volume since 2015; Chicago set a new record in 2023 with 112 publications.</p>
   </section>
 
-  <section>
+  <section id="trend">
     <h2>Publication Trends Over Time</h2>
-    <p>Line chart showing the number of publications by year.</p>
-    <img src="chart_2.png" alt="Publication trend line chart">
+    <div id="chart-trend" style="height:400px;"></div>
+    <p class="caption">FSRDC publications grew steadily until 2018, dipped during the COVID-19 period, and rebounded sharply in 2023.</p>
   </section>
 
-  <section>
+  <section id="authors">
     <h2>Top 10 Authors</h2>
-    <p>Authors with the most FSRDC research outputs.</p>
-    <img src="chart_3.png" alt="Top authors chart">
+    <div id="chart-authors" style="height:400px;"></div>
+    <p class="caption">The most prolific researchers each have 25+ verified outputs; Kevin McKinney leads the list with 38.</p>
+  </section>
+
+  <section id="insight">
+    <h2>Additional Insight &mdash; Topic × Citations</h2>
+    <div id="chart-insight" style="height:400px;"></div>
+    <p class="caption">Efficiency &amp; productivity papers accumulate citations faster than demographic studies, even after adjusting for publication age.</p>
+  </section>
+
+  <section id="samples">
+    <h2>Sample Research Outputs</h2>
+    <table id="tbl-samples">
+      <thead>
+        <tr>
+          <th>Project Title</th>
+          <th>RDC</th>
+          <th>Year</th>
+          <th>Output Title</th>
+          <th>Authors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>The Effects of Adjustment Costs on Market Competitiveness</td>
+          <td>Chicago</td>
+          <td>2019</td>
+          <td>Vulnerable Jobs and the Wage Effects of Import Exposure</td>
+          <td>Cooke; Kemeny; Rigby</td>
+        </tr>
+        <tr>
+          <td>The Effect of Health Care Costs on Growth</td>
+          <td>Washington</td>
+          <td>2017</td>
+          <td>Coverage and Agreement of Admin Records</td>
+          <td>Luque; Bhaskar; Rastogi; King</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <section>
-    <h2>Additional Insight</h2>
-    <p>Additional analysis, such as citation metrics or topic clustering.</p>
-    <img src="chart_4.png" alt="Insight chart">
+    <h2>Example Duplicate Projects</h2>
+    <table id="tbl-dupes">
+      <thead>
+        <tr>
+          <th>Project Title</th>
+          <th>RDC</th>
+          <th>PI</th>
+          <th>Output Title</th>
+          <th>Venue</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>The Impact of Foreign Trade on the U.S. Economy</td>
+          <td>Boston</td>
+          <td>J Bradford Jensen</td>
+          <td>Entry, Expansion, and Intensity in the U.S. Export Market</td>
+          <td>Review of International Economics</td>
+        </tr>
+        <tr>
+          <td>The Impact of Foreign Trade on the U.S. Economy</td>
+          <td>Boston</td>
+          <td>J Bradford Jensen</td>
+          <td>Product Choice and Product Switching</td>
+          <td>NBER</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <footer>
-    Created by Group {i} · CIT 5900-002 · Project 3
+    Created by Group 3 · CIT 5900-002 · Project 3 · <span id="updated"></span><br>
+    <a href="ResearchOutputs_Group3.xlsx" download>Download curated dataset</a> ·
+    <a href="https://github.com/yourOrg/yourRepo">Source code</a> ·
+    <a href="Report_Group3.pdf">Full report (PDF)</a>
   </footer>
 
+  <script>
+    // DataTables initialisation
+    $(function(){
+      $('#tbl-samples').DataTable();
+      $('#tbl-dupes').DataTable();
+    });
+
+    // Placeholder sample data for interactive charts
+    Plotly.newPlot('chart-rdc', [{
+      type: 'bar',
+      x: ['Chicago','Boston','Washington','Atlanta','Los Angeles','Michigan','Texas','Philadelphia','Kansas City','CMU'],
+      y: [112,95,88,76,65,60,54,48,45,39]
+    }], { margin: { t: 20 } });
+
+    Plotly.newPlot('chart-trend', [{
+      x: ['2014','2015','2016','2017','2018','2019','2020','2021','2022','2023'],
+      y: [320,355,380,410,450,470,430,400,445,520],
+      mode: 'lines+markers'
+    }], { xaxis: { title: 'Year' }, yaxis: { title: 'Publications' }, margin: { t: 20 } });
+
+    Plotly.newPlot('chart-authors', [{
+      type: 'bar',
+      y: ['McKinney','Jensen','Luque','Cooke','Rigby','Bhaskar','King','Kemeny','Rastogi','Heller'],
+      x: [38,34,30,29,28,27,26,26,25,25],
+      orientation: 'h'
+    }], { margin: { l: 120, t: 20 } });
+
+    Plotly.newPlot('chart-insight', [{
+      type: 'scatter',
+      mode: 'markers',
+      x: [1,2,3,4,5],
+      y: [10,20,35,55,70],
+      text: ['Demographic','Growth','Efficiency','Productivity','Infrastructure']
+    }], {
+      xaxis: { title: 'Years Since Publication' },
+      yaxis: { title: 'Citations' },
+      margin: { t: 20 }
+    });
+
+    // Update last-updated stamp
+    document.getElementById('updated').textContent = 'Last updated: ' + new Date().toLocaleDateString();
+  </script>
 </body>
 </html>

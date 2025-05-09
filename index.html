@@ -54,6 +54,7 @@
 
   <nav>
     <a href="#rdc">Top RDCs</a>
+    <a href="#counts">Output Counts</a>
     <a href="#trend">Trends</a>
     <a href="#authors">Authors</a>
     <a href="#insight">Insights</a>
@@ -74,47 +75,32 @@
     </p>
   </section>
 
-  <section id="trend">
-    <h2>Publication Trends Over Time</h2>
-    <div id="chart-trend" style="height:400px;"></div>
-    <p class="caption">FSRDC publications grew steadily until 2018, dipped during the COVID-19 period, and rebounded sharply in 2023.</p>
-  </section>
-
   <section id="authors">
     <h2>Top 10 Authors</h2>
-    <div id="chart-authors" style="height:400px;"></div>
-    <p class="caption">The most prolific researchers each have 25+ verified outputs; Kevin McKinney leads the list with 38.</p>
-  </section>
-
-  <section id="insight">
-    <h2>Additional Insight &mdash; Topic × Citations</h2>
-    <div id="chart-insight" style="height:400px;"></div>
-    <p class="caption">Efficiency &amp; productivity papers accumulate citations faster than demographic studies, even after adjusting for publication age.</p>
-  </section>
-
-  <section id="rdc">
-    <h2>Top 10 Research Data Centers (RDCs)</h2>
-    <div id="chart-rdc" style="height:400px"></div>
-    <p class="caption">Chicago, Boston and Washington DC have dominated output volume since 2015; Chicago set a new record in 2023 with 112 publications.</p>
-  </section>
-
-  <section id="trend">
-    <h2>Publication Trends Over Time</h2>
-    <div id="chart-trend" style="height:400px"></div>
-    <p class="caption">FSRDC publications grew steadily until 2018, dipped during the COVID‑19 period, and rebounded sharply in 2023.</p>
-  </section>
-
-  <section id="authors">
-    <h2>Top 10 Authors</h2>
     <div id="chart-authors" style="height:400px"></div>
-    <p class="caption">The most prolific researchers each have 25+ verified outputs; Kevin McKinney leads the list with 38.</p>
+    <p class="caption">Scott H. Holan leads with 40 outputs, followed by John Haltiwanger (29) and Jerome&nbsp;P.&nbsp;Reiter (28).</p>
   </section>
 
-  <section id="insight">
-    <h2>Additional Insight — Topic × Citations</h2>
-    <div id="chart-insight" style="height:400px"></div>
-    <p class="caption">Efficiency & productivity papers accumulate citations faster than demographic studies, even after adjusting for publication age.</p>
+  <section id="authors-cites">
+    <h2>Top 10 Authors by Total Citations</h2>
+    <div id="chart-authors-cites" style="height:400px"></div>
+    <p class="caption">
+      <strong>Javier Miranda</strong> leads with 14 total citations, just ahead of
+      William R. Kerr and John Haltiwanger (13 each). The list largely overlaps
+      with the high-output ranking, indicating these researchers combine both
+      productivity and impact.
+    </p>
   </section>
+
+  <section id="scatter-cite">
+    <h2>Citations vs. Days Since Publication</h2>
+    <div id="chart-cite" style="height:450px"></div>
+    <p class="caption">
+      Most papers accumulate &lt;500 citations even after 20&nbsp;years,
+      with a handful of outliers exceeding 6 k—10 k cites.
+    </p>
+  </section>
+
 
   <!-- New: static figures taken from technical report -->
   <section id="comparison">
@@ -233,30 +219,62 @@
         margin: { t: 20 }
     });
 
-    Plotly.newPlot('chart-trend', [{
-      x: ['2014','2015','2016','2017','2018','2019','2020','2021','2022','2023'],
-      y: [320,355,380,410,450,470,430,400,445,520],
-      mode: 'lines+markers'
-    }], { xaxis: { title: 'Year' }, yaxis: { title: 'Publications' }, margin: { t: 20 } });
+    const topAuthors = [
+    { name: 'Scott H. Holan', count: 40 },
+    { name: 'John Haltiwanger', count: 29 },
+    { name: 'Jerome P. Reiter', count: 28 },
+    { name: 'Javier Miranda', count: 27 },
+    { name: 'Lucia Foster', count: 24 },
+    { name: 'Christopher K. Wikle', count: 24 },
+    { name: 'Nathan Goldschlag', count: 21 },
+    { name: 'Ron S. Jarmin', count: 19 },
+    { name: 'William R. Kerr', count: 18 },
+    { name: 'John V. Winters', count: 15 }
+    ];
 
     Plotly.newPlot('chart-authors', [{
-      type: 'bar',
-      y: ['McKinney','Jensen','Luque','Cooke','Rigby','Bhaskar','King','Kemeny','Rastogi','Heller'],
-      x: [38,34,30,29,28,27,26,26,25,25],
-      orientation: 'h'
-    }], { margin: { l: 120, t: 20 } });
-
-    Plotly.newPlot('chart-insight', [{
-      type: 'scatter',
-      mode: 'markers',
-      x: [1,2,3,4,5],
-      y: [10,20,35,55,70],
-      text: ['Demographic','Growth','Efficiency','Productivity','Infrastructure']
-    }], {
-      xaxis: { title: 'Years Since Publication' },
-      yaxis: { title: 'Citations' },
-      margin: { t: 20 }
+        type: 'bar',
+        y: topAuthors.map(a => a.name),
+        x: topAuthors.map(a => a.count),
+        orientation: 'h'
+        }], {
+        margin: { l: 200, t: 20 },
+        xaxis: { title: 'Publications' },
+        yaxis: { autorange: 'reversed', automargin: true },
     });
+
+
+    Plotly.newPlot('chart-authors-cites', [{
+        type: 'bar',
+        y: [
+            'Javier Miranda','William R. Kerr','John Haltiwanger',
+            'Lucia Foster','Scott H. Holan','Nikolas Zolas',
+            'Jerome P. Reiter','Sari Pekkala Kerr','Andrew B. Bernard','Richard V. Burkhauser'
+        ],
+        x: [14,13,13,12,12,11,11,10,9,9],
+        orientation: 'h'
+        }], {
+        margin: { l: 220, t: 20 },
+        xaxis: { title: 'Total Citations' },
+        yaxis: { autorange: 'reversed', automargin: true }
+    });
+
+    Plotly.d3.csv('assets/duration_vs_cite.csv').then(raw=>{
+        const trace = {
+            type: 'scattergl',
+            mode: 'markers',
+            x: raw.map(r=>+r.days_since_pub),
+            y: raw.map(r=>+r.cite_count),
+            text: raw.map(r=>r.title),
+            marker: { size: 6, opacity: 0.6 }
+        };
+        Plotly.newPlot('chart-cite', [trace], {
+            xaxis:{ title:'Days Since Publication' },
+            yaxis:{ title:'Cite Count', type:'log' },
+            margin:{ t:20 }
+        });
+    });
+
 
     // Update last-updated stamp
     document.getElementById('updated').textContent = 'Last updated: ' + new Date().toLocaleDateString();

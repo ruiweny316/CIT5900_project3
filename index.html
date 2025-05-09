@@ -62,8 +62,16 @@
 
   <section id="rdc">
     <h2>Top 10 Research Data Centers (RDCs)</h2>
-    <div id="chart-rdc" style="height:400px;"></div>
-    <p class="caption">Chicago, Boston and Washington DC have dominated output volume since 2015; Chicago set a new record in 2023 with 112 publications.</p>
+    <div id="chart-rdc" style="height:400px"></div>
+    <p class="caption">Boston, Washington DC, and Michigan currently lead in total outputs, each exceeding 140 publications.</p>
+  </section>
+
+  <section id="counts">
+    <h2>Counts Over Years</h2>
+    <div id="chart-counts" style="height:400px"></div>
+    <p class="caption">
+      Output volume climbed from single-digits in the early 1990s to a record 126 publications in 2018.
+    </p>
   </section>
 
   <section id="trend">
@@ -82,6 +90,51 @@
     <h2>Additional Insight &mdash; Topic × Citations</h2>
     <div id="chart-insight" style="height:400px;"></div>
     <p class="caption">Efficiency &amp; productivity papers accumulate citations faster than demographic studies, even after adjusting for publication age.</p>
+  </section>
+
+  <section id="rdc">
+    <h2>Top 10 Research Data Centers (RDCs)</h2>
+    <div id="chart-rdc" style="height:400px"></div>
+    <p class="caption">Chicago, Boston and Washington DC have dominated output volume since 2015; Chicago set a new record in 2023 with 112 publications.</p>
+  </section>
+
+  <section id="trend">
+    <h2>Publication Trends Over Time</h2>
+    <div id="chart-trend" style="height:400px"></div>
+    <p class="caption">FSRDC publications grew steadily until 2018, dipped during the COVID‑19 period, and rebounded sharply in 2023.</p>
+  </section>
+
+  <section id="authors">
+    <h2>Top 10 Authors</h2>
+    <div id="chart-authors" style="height:400px"></div>
+    <p class="caption">The most prolific researchers each have 25+ verified outputs; Kevin McKinney leads the list with 38.</p>
+  </section>
+
+  <section id="insight">
+    <h2>Additional Insight — Topic × Citations</h2>
+    <div id="chart-insight" style="height:400px"></div>
+    <p class="caption">Efficiency & productivity papers accumulate citations faster than demographic studies, even after adjusting for publication age.</p>
+  </section>
+
+  <!-- New: static figures taken from technical report -->
+  <section id="comparison">
+    <h2>Supplementary Figures from Technical Report</h2>
+
+    <h3>Yearly Output Counts (Our Dataset vs FSRDC‑Verified 2024)</h3>
+    <img src="assets/figure_yearly_counts.png" alt="Yearly count comparison">
+    <p class="caption">Our combined dataset adds 200+ outputs between 1989‑2025, with a peak of 97 publications in 2018, outperforming the official 2024 file in several years. Source: Fig. 3 of the report.citeturn5file15</p>
+
+    <h3>Distribution of Output Types</h3>
+    <img src="assets/figure_output_types.png" alt="Output type distribution">
+    <p class="caption">Journal‑article publications account for ~60 % of new outputs, whereas the verified dataset remains heavier on working papers. Source: Fig. 4.citeturn5file15</p>
+
+    <h3>Topics Over Time</h3>
+    <img src="assets/figure_topics_over_time.png" alt="Topics over time">
+    <p class="caption">Despite a long‑run dominance of demographic studies, interest in growth and rural‑infrastructure topics rose sharply after 2020. Source: Fig. 5.citeturn5file13</p>
+
+    <h3>Network Connectivity of Research Outputs</h3>
+    <img src="assets/figure_network_components.png" alt="Network connected components graph">
+    <p class="caption">An author/topic/location graph reveals 51 connected components; the largest (Boston – demographic data) contains 686 papers. Source: Fig. 6.citeturn5file14</p>
   </section>
 
   <section id="samples">
@@ -163,9 +216,22 @@
     // Placeholder sample data for interactive charts
     Plotly.newPlot('chart-rdc', [{
       type: 'bar',
-      x: ['Chicago','Boston','Washington','Atlanta','Los Angeles','Michigan','Texas','Philadelphia','Kansas City','CMU'],
-      y: [112,95,88,76,65,60,54,48,45,39]
-    }], { margin: { t: 20 } });
+      x: ['Boston','Washington','Michigan','Triangle','Chicago','Baruch','Berkeley','Cornell','Atlanta','UCLA'],
+      y: [169,163,145,143,134,114,87,79,76,64]
+    }], { margin: { t: 20 }, yaxis: { title: 'Publications' } });
+
+    Plotly.newPlot('chart-counts', [{
+        x: [1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,
+            2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,
+            2017,2018,2019,2020,2021,2022,2023,2024,2025],
+        y: [6,1,2,2,6,2,3,9,14,7,4,14,13,19,26,30,20,19,39,42,62,54,56,71,85,94,
+            100,105,91,126,104,92,71,94,96,76,7],
+        mode: 'lines+markers'
+        }], {
+        xaxis: { title: 'Year' },
+        yaxis: { title: 'Publications' },
+        margin: { t: 20 }
+    });
 
     Plotly.newPlot('chart-trend', [{
       x: ['2014','2015','2016','2017','2018','2019','2020','2021','2022','2023'],

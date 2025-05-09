@@ -10,6 +10,7 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
   <style>
     body {
@@ -53,18 +54,87 @@
   <p>This dashboard summarizes key insights from our CIT 5900 Project 3 analysis of Federal Statistical Research Data Center (FSRDC) outputs. Interactive charts let you explore the data &mdash; captions highlight the main take-aways.</p>
 
   <nav>
+    <a href="#method">Methodology</a>
     <a href="#rdc">Top RDCs</a>
+    <a href="#rdc-cites">RDCs by Average Citations</a>
     <a href="#counts">Output Counts</a>
-    <a href="#trend">Trends</a>
     <a href="#authors">Authors</a>
-    <a href="#insight">Insights</a>
-    <a href="#samples">Samples</a>
+    <a href="#authors-cites">Authors by Total Citations</a>
+    <a href="#scatter-cite">Citations vs. Days Since Publication</a>
+    <a href="#outputtype-cite">Mean Citations by Output Type</a>
+    <a href="#comparison">Supplementary Figures</a>
+    
+
   </nav>
+
+<!-- Methodology & Analysis Overview -->
+<section id="method">
+  <h2>Methodology & Analysis</h2>
+
+  <h3>Data Enrichment & Curation</h3>
+  <p>
+    • Loaded 8 project metadata Excel sheets (AllMetadata, Researchers, Datasets, Abstracts, ResearchOutput2024) via <code>pandas</code>.<br>
+    • Merged on title and PI; standardized 17 key fields; removed duplicates and imputed missing values.<br>
+    • Generated enrichment keywords (RDC names, “FSRDC”, “Census Bureau”) to flag true FSRDC outputs.<br>
+    • Applied exact & fuzzy matching (threshold of 90) on author names and titles to filter out non-FSRDC records.<br>
+    • Queried the OpenAlex API (no additional APIs) by title/DOI to pull DOI, citation counts, publication dates, abstracts & topical concepts.<br>
+    • Web-scraped RePEc Census Working Papers for any missing records, using the same cleaning & acknowledgment-keyword criteria.
+  </p>
+
+  <h3>Exploratory Data Analysis</h3>
+  <ul>
+    <li>Top 10 RDCs by output volume: generated a bar chart showing the leading centers.</li>
+    <li>Publication trends over time: plotted Year (vs) # of publications to reveal growth, 2021 dip, and 2023 rebound.</li>
+    <li>Top 10 prolific authors: ranked by number of outputs and by total citations (h-index & raw counts).</li>
+    <li>Citation insights: used scatter/density plots to surface high-impact outliers and typical citation trajectories.</li>
+    <li>Merged our curated “New” dataset with the 2024 ResearchOutput.xlsx to compare coverage and extend the official list.</li>
+  </ul>
+
+  <h3>Classification & Topic Modeling</h3>
+  <p>
+    • Preprocessed abstracts (lowercase, remove stopwords/punctuation); replaced missing abstracts with titles.<br>
+    • Used a fine-tuned BERT classifier to assign each paper to one of five topic categories (e.g. Demographic Data, Economic Growth).<br>
+    • Analyzed topic prevalence over time: plotted percent of outputs per topic by year.
+  </p>
+
+  <h3>Statistical Modeling & Regression Analysis</h3>
+  <ul>
+    <li><strong>Linear Regression</strong>: Modeled citation count as a function of days-since-publication, topic dummies, and their interactions.  
+      Time-since-publication significantly interacts with Efficiency, Productivity &amp; Economic Growth topics (p &lt; 0.01), driving higher citation counts.</li>
+    <li>The model’s R²≈0.07 indicates modest explanatory power, highlighting additional factors—journal prestige, author networks, etc.—that lie outside our feature set.</li>
+  </ul>
+
+  <h3>Network Analysis</h3>
+  <p>
+    • Converted each record into a <code>ResearchOutput</code> object; built an undirected graph linking nodes sharing the same RDC & topic.<br>
+    • Graph has 918 nodes & 13,635 edges; identified 51 connected components, with the largest (N=686) centered on Boston & Demographic Data outputs.
+  </p>
+
+  <h3>Key Insights</h3>
+  <ul>
+    <li>Journal articles drive both the highest volume and extreme citation outliers (10 k+ cites).</li>
+    <li>High output volume does not guarantee high impact—some working papers and datasets show low citation curves.</li>
+    <li>Efficiency & Productivity topics accrue citations faster over time compared to Demographic or Infrastructure topics.</li>
+    <li>Boston, Penn State, and Yale not only publish the most but also host the most highly cited research.</li>
+  </ul>
+</section>
+
+
 
   <section id="rdc">
     <h2>Top 10 Research Data Centers (RDCs)</h2>
     <div id="chart-rdc" style="height:400px"></div>
     <p class="caption">Boston, Washington DC, and Michigan currently lead in total outputs, each exceeding 140 publications.</p>
+  </section>
+
+  <section id="rdc-cites">
+    <h2>Top 10 RDCs by Average Citations per Output</h2>
+    <div id="chart-rdc-cites" style="height:400px"></div>
+    <p class="caption">
+      Outputs originating from <strong>Penn State</strong> average almost&nbsp;600 citations,
+      far ahead of Yale (≈ 409) and Kansas City (≈ 265), suggesting these centers
+      host especially high-impact projects.
+    </p>
   </section>
 
   <section id="counts">
@@ -101,103 +171,54 @@
     </p>
   </section>
 
+  <section id="outputtype-cite">
+    <h2>Mean Citations vs. Days Since Publication (by Output Type)</h2>
+    <div id="chart-outputtype" style="height:480px"></div>
+    <p class="caption">
+      Journal articles (blue) dominate the high-citation tail, while working papers
+      and datasets stay below&nbsp;2 k citations even after two decades.
+    </p>
+  </section>
 
   <!-- New: static figures taken from technical report -->
   <section id="comparison">
-    <h2>Supplementary Figures from Technical Report</h2>
+    <h2>Supplementary Figures from Modeling</h2>
 
-    <h3>Yearly Output Counts (Our Dataset vs FSRDC‑Verified 2024)</h3>
-    <img src="assets/figure_yearly_counts.png" alt="Yearly count comparison">
-    <p class="caption">Our combined dataset adds 200+ outputs between 1989‑2025, with a peak of 97 publications in 2018, outperforming the official 2024 file in several years. Source: Fig. 3 of the report.citeturn5file15</p>
+    <h3>Number of Outputs per Year by BERTopic</h3>
+    <figure>
+      <img src="assets/topic_by_year.png" alt="Number of Outputs per Year by BERTopic" style="width:100%;max-width:600px;">
+      <figcaption>Number of Outputs per Year by BERTopic</figcaption>
+    </figure>
+    <p class="caption">
+      Urban Studies (cyan) has dominated FSRDC research since about 2012, surging to over 115 outputs in 2018 and remaining the top topic through 2024.  
+      The Firms topic (brown) also saw rapid growth, peaking around 2016–17, while General Economics (pink) and Healthcare (gray) climbed steadily after 2010.  
+      By contrast, niche areas like Crime (orange), Education (red) and Environment (purple) stay at low single‐digit counts.  
+      This shift suggests a growing emphasis on urban and firm‐level analysis in recent years.
+    </p>  
 
-    <h3>Distribution of Output Types</h3>
-    <img src="assets/figure_output_types.png" alt="Output type distribution">
-    <p class="caption">Journal‑article publications account for ~60 % of new outputs, whereas the verified dataset remains heavier on working papers. Source: Fig. 4.citeturn5file15</p>
-
-    <h3>Topics Over Time</h3>
-    <img src="assets/figure_topics_over_time.png" alt="Topics over time">
-    <p class="caption">Despite a long‑run dominance of demographic studies, interest in growth and rural‑infrastructure topics rose sharply after 2020. Source: Fig. 5.citeturn5file13</p>
-
-    <h3>Network Connectivity of Research Outputs</h3>
-    <img src="assets/figure_network_components.png" alt="Network connected components graph">
-    <p class="caption">An author/topic/location graph reveals 51 connected components; the largest (Boston – demographic data) contains 686 papers. Source: Fig. 6.citeturn5file14</p>
+    <h3>Evolution of Topics Across Years</h3>
+    <figure>
+      <img src="assets/fig4.png" alt="Evolution of Topics Across Years (static)" style="width:100%;max-width:600px;">
+      <figcaption>Evolution of Topics Across Years</figcaption>
+    </figure>
+    <p class="caption">
+      Demographic Data &amp; Household Structures (blue) dominated FSRDC outputs in the early 1990s and has since stabilized around 50–70 % of publications per year.  
+      Growth, Firm and Productivity (green) surged to 100 % briefly in the mid-’90s, dipped around 2000, and then climbed back to roughly 20–30 % after 2005.  
+      Efficiency, Productivity and Economic Growth (red) peaked at 50 % in the early ’90s but fell to near zero by 2010, indicating a waning focus on pure economic‐growth topics.  
+      Human Capital, Labor Force and Productivity (purple) appears only after 2000 and remains a niche < 15 % share.
+    </p>
   </section>
 
-  <section id="samples">
-    <h2>Sample Research Outputs</h2>
-    <table id="tbl-samples">
-      <thead>
-        <tr>
-          <th>Project Title</th>
-          <th>RDC</th>
-          <th>Year</th>
-          <th>Output Title</th>
-          <th>Authors</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>The Effects of Adjustment Costs on Market Competitiveness</td>
-          <td>Chicago</td>
-          <td>2019</td>
-          <td>Vulnerable Jobs and the Wage Effects of Import Exposure</td>
-          <td>Cooke; Kemeny; Rigby</td>
-        </tr>
-        <tr>
-          <td>The Effect of Health Care Costs on Growth</td>
-          <td>Washington</td>
-          <td>2017</td>
-          <td>Coverage and Agreement of Admin Records</td>
-          <td>Luque; Bhaskar; Rastogi; King</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
 
-  <section>
-    <h2>Example Duplicate Projects</h2>
-    <table id="tbl-dupes">
-      <thead>
-        <tr>
-          <th>Project Title</th>
-          <th>RDC</th>
-          <th>PI</th>
-          <th>Output Title</th>
-          <th>Venue</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>The Impact of Foreign Trade on the U.S. Economy</td>
-          <td>Boston</td>
-          <td>J Bradford Jensen</td>
-          <td>Entry, Expansion, and Intensity in the U.S. Export Market</td>
-          <td>Review of International Economics</td>
-        </tr>
-        <tr>
-          <td>The Impact of Foreign Trade on the U.S. Economy</td>
-          <td>Boston</td>
-          <td>J Bradford Jensen</td>
-          <td>Product Choice and Product Switching</td>
-          <td>NBER</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
 
   <footer>
-    Created by Group 3 · CIT 5900-002 · Project 3 · <span id="updated"></span><br>
-    <a href="ResearchOutputs_Group3.xlsx" download>Download curated dataset</a> ·
-    <a href="https://github.com/yourOrg/yourRepo">Source code</a> ·
-    <a href="Report_Group3.pdf">Full report (PDF)</a>
+    Created by Group 2 · CIT 5900-002 · Project 3 · <span id="updated"></span><br>
+    <a href="assets/output_matches_new.csv" download>Download curated dataset</a> ·
+    <a href="https://github.com/ruiweny316/CIT5900_project3" target="_blank">Source code</a> ·
+    <a href="assets/Report_Group2.pdf">Full report (PDF)</a>
   </footer>
 
   <script>
-    // DataTables initialisation
-    $(function(){
-      $('#tbl-samples').DataTable();
-      $('#tbl-dupes').DataTable();
-    });
 
     // Placeholder sample data for interactive charts
     Plotly.newPlot('chart-rdc', [{
@@ -259,21 +280,128 @@
         yaxis: { autorange: 'reversed', automargin: true }
     });
 
-    Plotly.d3.csv('assets/duration_vs_cite.csv').then(raw=>{
+    fetch('assets/duration_vs_cite.csv')
+    .then(response => response.text())
+    .then(csvText => {
+        const raw = Papa.parse(csvText, { header: true }).data;
         const trace = {
             type: 'scattergl',
             mode: 'markers',
-            x: raw.map(r=>+r.days_since_publication),
-            y: raw.map(r=>+r.cited_by_count),
-            text: raw.map(r=>r.ProjectTitle),
+            x: raw.map(r => +r.days_since_publication),
+            y: raw.map(r => +r.cited_by_count),
+            text: raw.map(r => r.ProjectTitle),
             marker: { size: 6, opacity: 0.6 }
         };
         Plotly.newPlot('chart-cite', [trace], {
-            xaxis:{ title:'Days Since Publication' },
-            yaxis:{ title:'Cite Count', type:'log' },
-            margin:{ t:20 }
+            xaxis: { title: 'Days Since Publication' },
+            yaxis: { title: 'Cite Count', type: 'log' },
+            margin: { t: 20 }
+        });
+    })
+    .catch(error => {
+        console.error("Load CSV failed:", error);
+    });
+
+  // Average citations per output by RDC (descending)
+  Plotly.newPlot('chart-rdc-cites', [{
+    type: 'bar',
+    y: [
+      'Penn State','Yale','Kansas City','Berkeley',
+      'Boston','Utah','Baruch','Chicago','Kentucky','Triangle'
+    ],
+    x: [597.03,409.27,265.00,252.56,182.89,168.00,161.65,154.49,151.93,143.87],
+    orientation: 'h'
+  }], {
+    margin: { l: 150, t: 20 },
+    xaxis: { title: 'Average Citations' },
+    yaxis: { autorange: 'reversed', automargin: true }
+  });
+
+  // Load aggregated CSV and draw one trace per output type
+  fetch('assets/cited_by_outputtype.csv')
+    .then(response => response.text())
+    .then(csvText => {
+        const raw = Papa.parse(csvText, { header: true }).data;
+        
+        const dataByType = {};
+        raw.forEach(row => {
+            const type = row.OutputType_Clean;
+            if (!dataByType[type]) dataByType[type] = [];
+            dataByType[type].push({
+                days: +row.days_since_publication,
+                cites: +row.cited_by_count
+            });
+        });
+
+        const traces = Object.keys(dataByType).map(type => {
+            const sortedData = dataByType[type].sort((a, b) => a.days - b.days);
+            
+            return {
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: type,
+                x: sortedData.map(d => d.days),
+                y: sortedData.map(d => d.cites),
+                line: { 
+                    shape: 'spline', 
+                    smoothing: 0.3,
+                    width: 2
+                },
+                marker: { 
+                    size: 4,
+                    opacity: 0.6
+                },
+                hoverinfo: 'x+y+name',
+                hoverlabel: { namelength: -1 }
+            };
+        });
+
+        Plotly.newPlot('chart-outputtype', traces, {
+            xaxis: { 
+                title: 'Days Since Publication',
+                tickformat: 'd',
+                rangeslider: { visible: true }
+            },
+            yaxis: { 
+                title: 'Mean Cite Count',
+                range: [0, Math.max(10000, ...raw.map(r => +r.mean_cite_count))]
+            },
+            margin: { t: 20, r: 30 },
+            legend: { 
+                orientation: 'h',
+                x: 0.05,
+                y: 1.15,
+                traceorder: 'normal'
+            },
+            hovermode: 'x unified'
+        });
+    })
+    .catch(error => {
+        console.error("Load CSV failed:", error);
+        const testTraces = [
+            {
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Journal Article',
+                x: Array.from({length: 100}, (_, i) => i * 50),
+                y: Array.from({length: 100}, (_, i) => Math.pow(i * 0.5, 3)),
+                line: { shape: 'spline', smoothing: 0.3 }
+            },
+            {
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Working Paper',
+                x: Array.from({length: 100}, (_, i) => i * 50),
+                y: Array.from({length: 100}, (_, i) => Math.pow(i * 0.3, 3)),
+                line: { shape: 'spline', smoothing: 0.3 }
+            }
+        ];
+        Plotly.newPlot('chart-outputtype', testTraces, {
+            xaxis: { title: 'Days Since Publication' },
+            yaxis: { title: 'Mean Cite Count' }
         });
     });
+
 
 
     // Update last-updated stamp

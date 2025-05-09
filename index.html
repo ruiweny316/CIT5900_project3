@@ -263,9 +263,9 @@
         const trace = {
             type: 'scattergl',
             mode: 'markers',
-            x: raw.map(r=>+r.days_since_pub),
-            y: raw.map(r=>+r.cite_count),
-            text: raw.map(r=>r.title),
+            x: raw.map(r=>+r.days_since_publication),
+            y: raw.map(r=>+r.cited_by_count),
+            text: raw.map(r=>r.ProjectTitle),
             marker: { size: 6, opacity: 0.6 }
         };
         Plotly.newPlot('chart-cite', [trace], {
